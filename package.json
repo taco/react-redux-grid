@@ -22,6 +22,7 @@
     "hot": "webpack-dev-server --hot --inline --pretty --config webpack/webpack.config.hot.js"
   },
   "dependencies": {
+    "deep-equal": "^1.0.1",
     "font-awesome": "^4.6.1",
     "immutable": "^3.8.1",
     "react": "^15.0.1",

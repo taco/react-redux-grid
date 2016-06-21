@@ -1,11 +1,32 @@
 import { fromJS, is } from 'immutable';
+import deepEqual from 'deep-equal';
 import { mapStateToProps } from './mapStateToProps';
 import { keyGenerator } from './keyGenerator';
+
+const buffer = {};
+const to = {};
+const queue = (key, start) => {
+    clearTimeout(to[key]);
+    const delta = Date.now() - start;
+    if (!buffer[key]) {
+        buffer[key] = [];
+    }
+    buffer[key].push(delta);
+    console.log(key, `${delta} ms`);
+    to[key] = setTimeout(() => {
+        console.log(
+            `%c${key} Total: ${buffer[key].reduce((p, v) => p + v, 0)} ms`,
+            'font-weight:bold;color:blue;'
+        );
+        buffer[key] = [];
+    }, 200);
+};
 
 export function shouldGridUpdate(nextProps) {
     let result = true;
 
     try {
+        const start = Date.now();
         const { store } = this.props;
 
         const propsWithoutPlugins = {
@@ -20,18 +41,28 @@ export function shouldGridUpdate(nextProps) {
             columns: ''
         };
 
-        const nextStateProps =
-            fromJS(mapStateToProps(store.getState(), propsWithoutPlugins));
+        const nextStateProps = mapStateToProps(store.getState(), propsWithoutPlugins);
 
-        nextProps = fromJS(nextPropsWithoutPlugins);
+        queue('mapGrid', start);
+
+
+        nextProps = nextPropsWithoutPlugins;
+
+        const startEqual = Date.now();
 
         result = (
-            !is(nextProps, this._lastProps)
-            || !is(nextStateProps, this._stateProps)
+            !deepEqual(nextProps, this._lastProps)
+            || !deepEqual(nextStateProps, this._stateProps)
         );
+
+        queue('gridEqual', startEqual);
 
         this._stateProps = nextStateProps;
         this._lastProps = nextProps;
+
+
+
+        queue('gridShouldUpdate', start);
     } catch (e) { } // eslint-disable-line
 
     return result;
@@ -39,7 +70,7 @@ export function shouldGridUpdate(nextProps) {
 
 export function shouldRowUpdate(nextProps) {
     let result = true;
-
+    const start = Date.now();
     const {
         columns,
         editorState,
@@ -82,6 +113,7 @@ export function shouldRowUpdate(nextProps) {
     // cached, thusly just return true and create _lastProps
     if (!this._lastProps) {
         this._lastProps = nextProps;
+        queue('rowShouldUpdate', start);
         return true;
     }
 
@@ -90,6 +122,8 @@ export function shouldRowUpdate(nextProps) {
     );
 
     this._lastProps = nextProps;
+
+    queue('rowShouldUpdate', start);
 
     return result;
 }
