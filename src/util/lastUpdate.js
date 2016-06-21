@@ -1,16 +1,16 @@
 let num = 0;
 
 const REDUCER_KEYS = {
-    BulkActions: 'BulkActions',
-    DataSource: 'DataSource',
-    Editor: 'Editor',
-    ErrorHandler: 'ErrorHandler',
-    Filter: 'Filter',
-    Grid: 'Grid',
-    Loader: 'Loader',
-    Menu: 'Menu',
-    Pager: 'Pager',
-    Selection: 'Selection'
+    BulkActions: 'bulkaction',
+    DataSource: 'dataSource',
+    Editor: 'editor',
+    ErrorHandler: 'errorhandler',
+    Filter: 'filter',
+    Grid: 'grid',
+    Loader: 'loader',
+    Menu: 'menu',
+    Pager: 'pager',
+    Selection: 'selection'
 };
 
 export const generateLastUpdate = () => ++num;

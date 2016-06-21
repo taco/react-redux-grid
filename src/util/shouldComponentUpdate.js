@@ -6,28 +6,25 @@ import { getLastUpdate } from './lastUpdate';
 export function shouldGridUpdate(nextProps) {
     let result = true;
 
-    try {
-        const { reducerKeys, stateKey, store } = this.props;
+    const { reducerKeys, stateKey, store } = this.props;
 
-        const nextUpdate = getLastUpdate(store, stateKey, reducerKeys);
+    const nextUpdate = getLastUpdate(store, stateKey, reducerKeys);
 
-        if (this._needsRender) {
-            this._lastUpdate = nextUpdate;
-            this._lastProps = nextProps;
-            return true;
-        }
-
-        result = (
-            !deepEqual(nextUpdate, this._lastUpdate)
-        );
-
-        if (!result) {
-            result = !equalProps(nextProps, this._lastProps);
-        }
-
+    if (this._needsRender) {
         this._lastUpdate = nextUpdate;
         this._lastProps = nextProps;
-    } catch (e) {} // eslint-disable-line
+        return true;
+    }
+
+    result = (
+        !deepEqual(nextUpdate, this._lastUpdate)
+        || !equalProps(nextProps, this._lastProps)
+    );
+
+    console.log('nextUpdate', nextUpdate);
+
+    this._lastUpdate = nextUpdate;
+    this._lastProps = nextProps;
 
     if (result) {
         this._needsRender = true;

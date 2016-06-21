@@ -51,32 +51,32 @@ describe('LastUpdate utility', () => {
     it('Should getLastupdate and provide a map of reducers lastUpdate', () => {
         const store = {
             getState: () => ({
-                BulkActions: fromJS({ 'test-grid-1': { lastUpdate: 1 } }),
-                DataSource: fromJS({ 'test-grid-1': { lastUpdate: 2 } }),
-                Editor: fromJS({ 'test-grid-1': { lastUpdate: 3 } }),
-                ErrorHandler: fromJS({ 'test-grid-1': { lastUpdate: 4 } }),
-                Filter: fromJS({ 'test-grid-1': { lastUpdate: 5 } }),
-                Grid: fromJS({ 'test-grid-1': { lastUpdate: 6 } }),
-                Loader: fromJS({ 'test-grid-1': { lastUpdate: 7 } }),
-                Menu: fromJS({ 'test-grid-1': { lastUpdate: 8 } }),
-                Pager: fromJS({ 'test-grid-1': { lastUpdate: 9 } }),
-                Selection: fromJS({ 'test-grid-1': { lastUpdate: 10 } })
+                bulkaction: fromJS({ 'test-grid-1': { lastUpdate: 1 } }),
+                dataSource: fromJS({ 'test-grid-1': { lastUpdate: 2 } }),
+                editor: fromJS({ 'test-grid-1': { lastUpdate: 3 } }),
+                errorhandler: fromJS({ 'test-grid-1': { lastUpdate: 4 } }),
+                filter: fromJS({ 'test-grid-1': { lastUpdate: 5 } }),
+                grid: fromJS({ 'test-grid-1': { lastUpdate: 6 } }),
+                loader: fromJS({ 'test-grid-1': { lastUpdate: 7 } }),
+                menu: fromJS({ 'test-grid-1': { lastUpdate: 8 } }),
+                pager: fromJS({ 'test-grid-1': { lastUpdate: 9 } }),
+                selection: fromJS({ 'test-grid-1': { lastUpdate: 10 } })
             })
         };
 
         expect(
             getLastUpdate(store, 'test-grid-1')
         ).toEqual({
-            BulkActions: 1,
-            DataSource: 2,
-            Editor: 3,
-            ErrorHandler: 4,
-            Filter: 5,
-            Grid: 6,
-            Loader: 7,
-            Menu: 8,
-            Pager: 9,
-            Selection: 10
+            bulkaction: 1,
+            dataSource: 2,
+            editor: 3,
+            errorhandler: 4,
+            filter: 5,
+            grid: 6,
+            loader: 7,
+            menu: 8,
+            pager: 9,
+            selection: 10
         });
     });
 
