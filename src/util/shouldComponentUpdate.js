@@ -1,76 +1,43 @@
 import { fromJS, is } from 'immutable';
 import deepEqual from 'deep-equal';
-import { mapStateToProps } from './mapStateToProps';
 import { keyGenerator } from './keyGenerator';
-
-const buffer = {};
-const to = {};
-const queue = (key, start) => {
-    clearTimeout(to[key]);
-    const delta = Date.now() - start;
-    if (!buffer[key]) {
-        buffer[key] = [];
-    }
-    buffer[key].push(delta);
-    console.log(key, `${delta} ms`);
-    to[key] = setTimeout(() => {
-        console.log(
-            `%c${key} Total: ${buffer[key].reduce((p, v) => p + v, 0)} ms`,
-            'font-weight:bold;color:blue;'
-        );
-        buffer[key] = [];
-    }, 200);
-};
+import { getLastUpdate } from './lastUpdate';
 
 export function shouldGridUpdate(nextProps) {
     let result = true;
 
     try {
-        const start = Date.now();
-        const { store } = this.props;
+        const { reducerKeys, stateKey, store } = this.props;
 
-        const propsWithoutPlugins = {
-            ...this.props,
-            plugins: {},
-            columns: ''
-        };
+        const nextUpdate = getLastUpdate(store, stateKey, reducerKeys);
 
-        const nextPropsWithoutPlugins = {
-            ...nextProps,
-            plugins: {},
-            columns: ''
-        };
-
-        const nextStateProps = mapStateToProps(store.getState(), propsWithoutPlugins);
-
-        queue('mapGrid', start);
-
-
-        nextProps = nextPropsWithoutPlugins;
-
-        const startEqual = Date.now();
+        if (this._needsRender) {
+            this._lastUpdate = nextUpdate;
+            this._lastProps = nextProps;
+            return true;
+        }
 
         result = (
-            !deepEqual(nextProps, this._lastProps)
-            || !deepEqual(nextStateProps, this._stateProps)
+            !deepEqual(nextUpdate, this._lastUpdate)
         );
 
-        queue('gridEqual', startEqual);
+        if (!result) {
+            result = !equalProps(nextProps, this._lastProps);
+        }
 
-        this._stateProps = nextStateProps;
+        this._lastUpdate = nextUpdate;
         this._lastProps = nextProps;
+    } catch (e) {} // eslint-disable-line
 
-
-
-        queue('gridShouldUpdate', start);
-    } catch (e) { } // eslint-disable-line
+    if (result) {
+        this._needsRender = true;
+    }
 
     return result;
 }
 
 export function shouldRowUpdate(nextProps) {
     let result = true;
-    const start = Date.now();
     const {
         columns,
         editorState,
@@ -113,7 +80,6 @@ export function shouldRowUpdate(nextProps) {
     // cached, thusly just return true and create _lastProps
     if (!this._lastProps) {
         this._lastProps = nextProps;
-        queue('rowShouldUpdate', start);
         return true;
     }
 
@@ -123,7 +89,11 @@ export function shouldRowUpdate(nextProps) {
 
     this._lastProps = nextProps;
 
-    queue('rowShouldUpdate', start);
-
     return result;
 }
+
+export const equalProps = (props = {}, newProps = {}) => {
+    return props.height === newProps.height
+        && deepEqual(props.classNames, newProps.classNames)
+        && deepEqual(props.events, newProps.events);
+};

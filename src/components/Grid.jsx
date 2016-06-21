@@ -43,6 +43,8 @@ class Grid extends Component {
             menuState
         } = this.props;
 
+        this._needsRender = false;
+
         let columns = columnState && columnState.columns
             ? columnState.columns
             : [];

@@ -5,7 +5,7 @@ import {
     PAGE_REMOTE
 } from '../../../constants/ActionTypes';
 
-import { generateLastUpdate } from './../../../util/generateLastUpdate';
+import { generateLastUpdate } from './../../../util/lastUpdate';
 
 const initialState = fromJS({
     lastUpdate: generateLastUpdate()
@@ -16,14 +16,16 @@ export default function pager(state = initialState, action) {
     switch (action.type) {
 
     case PAGE_LOCAL:
-        return state.setIn([action.stateKey], fromJS({
+        return state.mergeIn([action.stateKey], {
+            pageIndex: action.pageIndex,
             lastUpdate: generateLastUpdate()
-        }));
+        });
 
     case PAGE_REMOTE:
-        return state.setIn([action.stateKey], fromJS({
+        return state.mergeIn([action.stateKey], {
+            pageIndex: action.pageIndex,
             lastUpdate: generateLastUpdate()
-        }));
+        });
 
     default:
         return state;

@@ -6,7 +6,7 @@ import {
     SET_SORT_DIRECTION
 } from './../../constants/ActionTypes';
 
-import { generateLastUpdate } from './../../util/generateLastUpdate';
+import { generateLastUpdate } from './../../util/lastUpdate';
 
 const initialState = fromJS({ lastUpdate: generateLastUpdate() });
 

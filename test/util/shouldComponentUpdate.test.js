@@ -66,7 +66,7 @@ describe('shouldGridUpdate utility function', () => {
         expect(
            shouldGridUpdate.call(component, alteredNextProps)
         ).toEqual(
-            false
+            true
         );
 
     });

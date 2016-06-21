@@ -9,7 +9,7 @@ import { SET_DATA,
     SORT_DATA
 } from '../../constants/ActionTypes';
 
-import { generateLastUpdate } from './../../util/generateLastUpdate';
+import { generateLastUpdate } from './../../util/lastUpdate';
 
 const initialState = fromJS({ lastUpdate: generateLastUpdate() });
 

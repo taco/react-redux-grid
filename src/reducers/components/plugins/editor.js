@@ -13,7 +13,7 @@ import {
     setDataAtDataIndex
 } from './../../../util/getData';
 
-import { generateLastUpdate } from './../../../util/generateLastUpdate';
+import { generateLastUpdate } from './../../../util/lastUpdate';
 
 const initialState = fromJS({
     lastUpdate: generateLastUpdate()
@@ -79,19 +79,24 @@ export default function editor(state = initialState, action) {
 
         const valid = isRowValid(columns, rowValues);
 
-        return state.mergeIn([action.stateKey], fromJS({
-            row: {
-                values: rowValues,
-                previousValues: state.getIn([stateKey, 'row', 'values']),
-                valid
-            },
-            lastUpdate: generateLastUpdate()
-        }));
+        state = state.mergeIn([action.stateKey, 'row'], {
+            values: rowValues,
+            previousValues: state.getIn([stateKey, 'row', 'values']),
+            valid
+        });
+
+        return state.setIn(
+            [action.stateKey, 'lastUpdate'],
+            generateLastUpdate()
+        );
 
     case REMOVE_ROW:
     case DISMISS_EDITOR:
     case CANCEL_ROW:
-        return state.setIn([action.stateKey], fromJS({ lastUpdate: generateLastUpdate() }));
+        return state.setIn(
+            [action.stateKey],
+            fromJS({ lastUpdate: generateLastUpdate() })
+        );
 
     default:
         return state;

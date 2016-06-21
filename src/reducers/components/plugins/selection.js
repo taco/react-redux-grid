@@ -6,7 +6,7 @@ import {
     DESELECT_ALL
 } from '../../../constants/ActionTypes';
 
-import { generateLastUpdate } from './../../../util/generateLastUpdate';
+import { generateLastUpdate } from './../../../util/lastUpdate';
 
 const initialState = fromJS({ lastUpdate: generateLastUpdate() });
 
