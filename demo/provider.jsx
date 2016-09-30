@@ -22,11 +22,11 @@ import {
 
 const config = {
     columns,
-    // data,
+    data,
     //data: treeData,
     //dataSource: treeDataSource,
     stateful,
-    dataSource,
+    // dataSource,
     //dragAndDrop: true,
     //gridType: 'tree',
     pageSize,
