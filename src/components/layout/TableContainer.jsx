@@ -1,11 +1,13 @@
 import React, { Component, PropTypes } from 'react';
+import ReactDOM from 'react-dom';
 
 import { CLASS_NAMES } from './../../constants/GridConstants';
 import { prefix } from './../../util/prefix';
+import { debounce } from './../../util/throttle';
 import Row from './TableRow';
 import Header from './Header';
 
-const { any, number, object, oneOfType, string } = PropTypes;
+const { any, bool, number, object, oneOfType, string } = PropTypes;
 
 export class TableContainer extends Component {
 
@@ -15,8 +17,11 @@ export class TableContainer extends Component {
             editorComponent,
             headerProps,
             height,
-            rowProps
+            rowProps,
+            infinite
         } = this.props;
+
+        const { scrollTop } = this.state;
 
         const tableContainerProps = {
             className: prefix(CLASS_NAMES.TABLE_CONTAINER),
@@ -34,15 +39,32 @@ export class TableContainer extends Component {
             <div { ...tableContainerProps } >
                 <table { ...tableProps }>
                     <Header { ...headerProps } />
-                    <Row { ...rowProps } />
+                    <Row { ...{ ...rowProps, scrollTop, infinite } } />
                 </table>
                 { editorComponent }
             </div>
         );
     }
 
+    componentDidMount() {
+        const { infinite } = this.props;
+
+        if (infinite) {
+            this.container = ReactDOM.findDOMNode(this);
+
+            this.container.addEventListener(
+                'scroll',
+                debounce(this.onScroll.bind(this), 20)
+            );
+        }
+    }
+
     constructor(props) {
         super(props);
+
+        this.state = {
+            scrollTop: 0
+        };
     }
 
     static propTypes = {
@@ -52,6 +74,7 @@ export class TableContainer extends Component {
             string,
             number
         ]),
+        infinite: bool,
         rowProps: object
     };
 
@@ -59,6 +82,12 @@ export class TableContainer extends Component {
         headerProps: {},
         rowProps: {}
     };
+
+    onScroll = () => {
+        this.setState({
+            scrollTop: this.container.scrollTop
+        });
+    }
 
 }
 

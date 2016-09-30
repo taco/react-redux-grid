@@ -25,6 +25,7 @@ const config = {
     data,
     //data: treeData,
     //dataSource: treeDataSource,
+    infinite: true,
     stateful,
     // dataSource,
     //dragAndDrop: true,

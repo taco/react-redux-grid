@@ -27,6 +27,7 @@ export class TableRow extends Component {
             emptyDataMessage,
             events,
             gridType,
+            infinite,
             menuState,
             pageSize,
             pager,
@@ -37,13 +38,26 @@ export class TableRow extends Component {
             selectionModel,
             showTreeRootNode,
             stateKey,
-            store
+            store,
+            scrollTop
         } = this.props;
 
         const pageIndex = pager && pager.pageIndex ? pager.pageIndex : 0;
 
+        const totalRecords = Array.isArray(dataSource.data)
+            ? dataSource.data.length
+            : 0;
+
         const rows = getRowSelection(
-            dataSource, pageIndex, pageSize, pager, plugins, stateKey, store
+            dataSource,
+            infinite,
+            pageIndex,
+            pageSize,
+            pager,
+            plugins,
+            scrollTop,
+            stateKey,
+            store
         );
 
         const rowComponents = getRows(
@@ -64,7 +78,10 @@ export class TableRow extends Component {
             selectedRows,
             showTreeRootNode,
             stateKey,
-            store
+            store,
+            scrollTop,
+            infinite,
+            totalRecords
         );
 
         const rowInsert = Array.isArray(rowComponents)
@@ -96,12 +113,14 @@ export class TableRow extends Component {
         gridType: oneOf([
             'tree', 'grid'
         ]),
+        infinite: bool,
         menuState: object,
         pageSize: number,
         pager: object,
         plugins: object,
         readFunc: func,
         reducerKeys: object,
+        scrollTop: number,
         selectedRows: object,
         selectionModel: object,
         showTreeRootNode: bool,
@@ -189,18 +208,30 @@ export const getRowComponents = (
 };
 
 export const getRowSelection = (
-    dataSource, pageIndex, pageSize, pager, plugins
+    dataSource,
+    infinite,
+    pageIndex,
+    pageSize,
+    pager,
+    plugins,
+    scrollTop,
+    stateKey,
+    store
 ) => {
+
     if (!dataSource) {
         return false;
     }
 
     if (!isPluginEnabled(plugins, 'PAGER')
-        || plugins.PAGER.pagingType === 'remote') {
+        || plugins.PAGER.pagingType === 'remote'
+        && !infinite) {
         return dataSource.data;
     }
 
-    return getCurrentRecords(dataSource, pageIndex, pageSize);
+    return getCurrentRecords(
+        dataSource, pageIndex, pageSize, scrollTop, infinite
+    );
 };
 
 export const getRows = (
@@ -221,10 +252,13 @@ export const getRows = (
     selectedRows,
     showTreeRootNode,
     stateKey,
-    store
+    store,
+    scrollTop,
+    infinite,
+    totalRecords
 ) => {
 
-    return Array.isArray(rows)
+    const rowArray = Array.isArray(rows)
             ? rows.map((row, i) => getRowComponents(
                 columns,
                 columnManager,
@@ -246,7 +280,23 @@ export const getRows = (
                 store,
                 i
             ))
-            : null;
+            : [];
+
+    if (!infinite) {
+        return rowArray;
+    }
+
+    const renderedRows = rowArray.length;
+
+    const bufferTop = 0;
+    const bufferBottom = 0;
+
+    // adding buffer rows for infinite scroll
+    rowArray.unshift(<tr></tr>);
+    rowArray.push(<tr></tr>);
+
+    return rowArray;
+
 };
 
 export const getTreeData = row => ({

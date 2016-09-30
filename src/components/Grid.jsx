@@ -49,6 +49,7 @@ class Grid extends Component {
             gridData,
             emptyDataMessage,
             height,
+            infinite,
             loadingState,
             pageSize,
             plugins,
@@ -150,6 +151,7 @@ class Grid extends Component {
             editorComponent,
             height,
             headerProps,
+            infinite,
             rowProps
         };
 
@@ -260,6 +262,7 @@ class Grid extends Component {
             string,
             number
         ]),
+        infinite: bool,
         loadingState: object,
         menuState: object,
         pageSize: number,
