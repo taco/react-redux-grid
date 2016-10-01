@@ -267,7 +267,7 @@ export const getCurrentRecordTotal = (
 
     else if (plugins.PAGER.pagingType === 'local') {
         const records = getCurrentRecords(gridData, pageIndex, pageSize);
-        return records ? records.length : 0;
+        return records && records.data ? records.data.length : 0;
     }
 
 };

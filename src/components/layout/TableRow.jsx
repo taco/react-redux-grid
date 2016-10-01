@@ -1,12 +1,16 @@
 import React, { Component, PropTypes } from 'react';
+import ReactDOM from 'react-dom';
 import { DragDropContext } from 'react-dnd';
 import HTML5Backend from 'react-dnd-html5-backend';
 
 import { isPluginEnabled } from '../../util/isPluginEnabled';
+import { bufferTop, bufferBottom } from '../../util/buffer';
+import { prefix } from '../../util/prefix';
 import { getCurrentRecords } from '../../util/getCurrentRecords';
 import { getRowKey } from '../../util/getData';
 
 import { moveNode } from '../../actions/GridActions';
+import { ROW_HEIGHT, CLASS_NAMES } from '../../constants/GridConstants';
 
 import Row from './table-row/Row';
 import { PlaceHolder } from './row/PlaceHolder';
@@ -44,7 +48,7 @@ export class TableRow extends Component {
 
         const pageIndex = pager && pager.pageIndex ? pager.pageIndex : 0;
 
-        const totalRecords = Array.isArray(dataSource.data)
+        const totalRecords = dataSource && Array.isArray(dataSource.data)
             ? dataSource.data.length
             : 0;
 
@@ -81,7 +85,8 @@ export class TableRow extends Component {
             store,
             scrollTop,
             infinite,
-            totalRecords
+            totalRecords,
+            this.rowHeight || ROW_HEIGHT
         );
 
         const rowInsert = Array.isArray(rowComponents)
@@ -94,6 +99,25 @@ export class TableRow extends Component {
                 { rowInsert }
             </tbody>
         );
+    }
+
+    componentDidUpdate() {
+        if (!this.rowHeight) {
+            const tbody = ReactDOM
+                .findDOMNode(this);
+
+            const firstRow = tbody
+                ? tbody.querySelector(prefix(CLASS_NAMES.ROW))
+                : null;
+
+            if (firstRow) {
+                this.rowHeight = firstRow.clientHeight;
+            }
+
+            else {
+                this.rowHeight = ROW_HEIGHT;
+            }
+        }
     }
 
     constructor(props) {
@@ -231,7 +255,7 @@ export const getRowSelection = (
 
     return getCurrentRecords(
         dataSource, pageIndex, pageSize, scrollTop, infinite
-    );
+    ).data;
 };
 
 export const getRows = (
@@ -255,7 +279,8 @@ export const getRows = (
     store,
     scrollTop,
     infinite,
-    totalRecords
+    totalRecords,
+    rowHeight
 ) => {
 
     const rowArray = Array.isArray(rows)
@@ -288,12 +313,31 @@ export const getRows = (
 
     const renderedRows = rowArray.length;
 
-    const bufferTop = 0;
-    const bufferBottom = 0;
+    const topProps = {
+        style: {
+            height: bufferTop(
+                totalRecords,
+                renderedRows,
+                scrollTop,
+                rowHeight
+            )
+        }
+    };
+
+    const bottomProps = {
+        style: {
+            height: bufferBottom(
+                totalRecords,
+                renderedRows,
+                scrollTop,
+                rowHeight
+            )
+        }
+    };
 
     // adding buffer rows for infinite scroll
-    rowArray.unshift(<tr></tr>);
-    rowArray.push(<tr></tr>);
+    rowArray.unshift(<tr { ...topProps } />);
+    rowArray.push(<tr { ...bottomProps } />);
 
     return rowArray;
 
