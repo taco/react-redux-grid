@@ -1,10 +1,11 @@
+/* eslint-disable react/no-set-state */
 import React, { Component, PropTypes } from 'react';
 import ReactDOM from 'react-dom';
 import { DragDropContext } from 'react-dnd';
 import HTML5Backend from 'react-dnd-html5-backend';
 
 import { isPluginEnabled } from '../../util/isPluginEnabled';
-import { scrollIndex, bufferTop, bufferBottom } from '../../util/buffer';
+import { bufferTop, bufferBottom } from '../../util/buffer';
 import { prefix } from '../../util/prefix';
 import { getCurrentRecords } from '../../util/getCurrentRecords';
 import { getRowKey } from '../../util/getData';
@@ -15,6 +16,8 @@ import { ROW_HEIGHT, CLASS_NAMES } from '../../constants/GridConstants';
 import Row from './table-row/Row';
 import { PlaceHolder } from './row/PlaceHolder';
 
+const BUFFER_MULTIPLIER = 1.5;
+
 const { arrayOf, bool, func, number, object, oneOf, string } = PropTypes;
 
 export class TableRow extends Component {
@@ -24,6 +27,7 @@ export class TableRow extends Component {
         const {
             columnManager,
             columns,
+            containerScrollTop,
             dataSource,
             dragAndDrop,
             editor,
@@ -36,21 +40,23 @@ export class TableRow extends Component {
             pageSize,
             pager,
             plugins,
-            reducerKeys,
             readFunc,
+            reducerKeys,
             selectedRows,
             selectionModel,
             showTreeRootNode,
             stateKey,
-            store,
-            scrollTop
+            store
         } = this.props;
 
         const pageIndex = pager && pager.pageIndex ? pager.pageIndex : 0;
 
-        const totalRecords = dataSource && Array.isArray(dataSource.data)
-            ? dataSource.data.length
-            : 0;
+        const totalCount = dataSource
+            && Array.isArray(dataSource.currentRecords)
+                ? dataSource.currentRecords.length
+                : 0;
+
+        const { viewableCount, viewableIndex, rowHeight } = this.state;
 
         const rows = getRowSelection(
             dataSource,
@@ -59,10 +65,11 @@ export class TableRow extends Component {
             pageSize,
             pager,
             plugins,
-            scrollTop,
+            viewableIndex,
+            viewableCount,
+            BUFFER_MULTIPLIER,
             stateKey,
-            store,
-            this
+            store
         );
 
         const rowComponents = getRows(
@@ -84,10 +91,13 @@ export class TableRow extends Component {
             showTreeRootNode,
             stateKey,
             store,
-            scrollTop,
+            containerScrollTop,
             infinite,
-            totalRecords,
-            this.rowHeight || ROW_HEIGHT
+            totalCount,
+            rowHeight,
+            viewableIndex,
+            viewableCount,
+            BUFFER_MULTIPLIER
         );
 
         const rowInsert = Array.isArray(rowComponents)
@@ -102,32 +112,41 @@ export class TableRow extends Component {
         );
     }
 
-    componentDidUpdate() {
-        if (!this.rowHeight) {
-            const tbody = ReactDOM
-                .findDOMNode(this);
+    componentDidMount() {
+        this.calculateHeights();
+    }
 
-            const firstRow = tbody
-                ? tbody.querySelector(prefix(CLASS_NAMES.ROW))
-                : null;
+    componentWillReceiveProps(nextProps) {
+        const { rowHeight } = this.state;
 
-            if (firstRow) {
-                this.rowHeight = firstRow.clientHeight;
-            }
-
-            else {
-                this.rowHeight = ROW_HEIGHT;
-            }
+        if (this.props.containerScrollTop !== nextProps.containerScrollTop) {
+            this.setState({
+                viewableIndex: Math.floor(
+                    nextProps.containerScrollTop / rowHeight
+                )
+            });
         }
+    }
+
+    componentDidUpdate() {
+        this.calculateHeights();
     }
 
     constructor(props) {
         super(props);
+
+        this.state = {
+            viewableIndex: 0,
+            rowHeight: ROW_HEIGHT,
+            viewableCount: 25
+        };
     }
 
     static propTypes = {
         columnManager: object.isRequired,
         columns: arrayOf(object).isRequired,
+        containerHeight: number,
+        containerScrollTop: number,
         data: arrayOf(object),
         dataSource: object,
         dragAndDrop: bool,
@@ -135,9 +154,7 @@ export class TableRow extends Component {
         editorState: object,
         emptyDataMessage: string,
         events: object,
-        gridType: oneOf([
-            'tree', 'grid'
-        ]),
+        gridType: oneOf(['tree', 'grid']),
         infinite: bool,
         menuState: object,
         pageSize: number,
@@ -145,7 +162,6 @@ export class TableRow extends Component {
         plugins: object,
         readFunc: func,
         reducerKeys: object,
-        scrollTop: number,
         selectedRows: object,
         selectionModel: object,
         showTreeRootNode: bool,
@@ -155,6 +171,43 @@ export class TableRow extends Component {
 
     static defaultProps = {
         emptyDataMessage: 'No Data Available'
+    };
+
+    calculateHeights = () => {
+        const { containerHeight } = this.props;
+        const { rowHeight, viewableCount } = this.state;
+
+        const tbody = ReactDOM
+            .findDOMNode(this);
+
+        const rows = tbody
+            ? Array.from(tbody.querySelectorAll(`.${prefix(CLASS_NAMES.ROW)}`))
+            : null;
+
+        if (!rows.length) {
+            return;
+        }
+
+        const nextRowHeight = Math.round(
+            rows.reduce((prev, el) => prev + el.clientHeight, 0) / rows.length
+        );
+
+        const nextState = {};
+
+        if (rowHeight !== nextRowHeight && nextRowHeight !== undefined) {
+            nextState.rowHeight = nextRowHeight;
+        }
+
+        const nextViewableCount = Math.ceil(containerHeight / rowHeight);
+
+        if (nextViewableCount !== viewableCount
+            && !Number.isNaN(nextViewableCount)) {
+            nextState.viewableCount = nextViewableCount;
+        }
+
+        if (Object.keys(nextState).length) {
+            this.setState(nextState);
+        }
     };
 
     moveRow = (current, next) => {
@@ -239,10 +292,11 @@ export const getRowSelection = (
     pageSize,
     pager,
     plugins,
-    scrollTop,
+    viewableIndex,
+    viewableCount,
+    bufferMultiplier,
     stateKey,
-    store,
-    scope
+    store
 ) => {
 
     if (!dataSource) {
@@ -256,7 +310,13 @@ export const getRowSelection = (
     }
 
     return getCurrentRecords(
-        dataSource, pageIndex, pageSize, scrollTop, infinite, scope.rowHeight || ROW_HEIGHT
+        dataSource,
+        pageIndex,
+        pageSize,
+        infinite,
+        viewableIndex,
+        viewableCount,
+        bufferMultiplier
     ).data;
 };
 
@@ -279,10 +339,13 @@ export const getRows = (
     showTreeRootNode,
     stateKey,
     store,
-    scrollTop,
+    containerScrollTop,
     infinite,
-    totalRecords,
-    rowHeight
+    totalCount,
+    rowHeight,
+    viewableIndex,
+    viewableCount,
+    bufferMultiplier
 ) => {
 
     const rowArray = Array.isArray(rows)
@@ -313,15 +376,13 @@ export const getRows = (
         return rowArray;
     }
 
-    const renderedRows = rowArray.length;
-
     const topProps = {
         style: {
             height: bufferTop(
-                totalRecords,
-                renderedRows,
-                scrollTop,
-                rowHeight
+                rowHeight,
+                viewableIndex,
+                viewableCount,
+                bufferMultiplier
             )
         }
     };
@@ -329,17 +390,27 @@ export const getRows = (
     const bottomProps = {
         style: {
             height: bufferBottom(
-                totalRecords,
-                renderedRows,
-                scrollTop,
-                rowHeight
+                rowHeight,
+                viewableIndex,
+                viewableCount,
+                bufferMultiplier,
+                totalCount
             )
         }
     };
 
     // adding buffer rows for infinite scroll
-    rowArray.unshift(<tr { ...topProps } />);
-    rowArray.push(<tr { ...bottomProps } />);
+    rowArray.unshift(
+        <tr
+            key="row-inifinite-buffer-top"
+            { ...topProps }
+        />
+    );
+    rowArray.push(
+        <tr
+            key="row-inifinite-buffer-bottom"
+            { ...bottomProps }
+        />);
 
     return rowArray;
 

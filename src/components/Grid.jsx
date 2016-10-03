@@ -23,7 +23,7 @@ import { isPluginEnabled } from '../util/isPluginEnabled';
 import { getColumnsFromStorage } from '../util/getColumnsFromStorage';
 import localStorageManager from './core/LocalStorageManager';
 
-import './../style/main.styl';
+import './../style/main';
 
 const {
     any,
@@ -121,7 +121,6 @@ class Grid extends Component {
             visible: true,
             gridData
         }, headerProps);
-
 
         const rowProps = {
             columnManager: this.columnManager,

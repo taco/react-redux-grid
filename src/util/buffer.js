@@ -3,61 +3,24 @@ import {
     ROW_HEIGHT
 } from './../constants/GridConstants';
 
-export const bufferBottom = (
-    total, totalRendered, scrollTop, rowHeight,
-) => {
-
-    const intervalsPossible = (
-        total * rowHeight / ((DEFAULT_RENDERED_RECORDS_VISIBLE / 2) * rowHeight)
-    );
-
-    const scroll = scrollIndex(rowHeight, scrollTop, intervalsPossible);
-    const maxHeight = rowHeight * (total - totalRendered);
-
-
-    // console.log('bufferBottom', scroll, scrollTop);
-
-    if (scroll === 0) {
-        return maxHeight;
-    }
-
-    // if (scroll + 1 === intervalsPossible) {
-    //     return 0;
-    // }
-
-    return maxHeight -
-        (scroll * (rowHeight * DEFAULT_RENDERED_RECORDS_VISIBLE / 4));
-
-};
-
 export const bufferTop = (
-    total, totalRendered, scrollTop, rowHeight
+    rowHeight, viewableIndex, viewableCount, bufferMultiplier
 ) => {
-
-    const intervalsPossible = (
-        total * rowHeight / ((DEFAULT_RENDERED_RECORDS_VISIBLE / 2) * rowHeight)
+    const spacerCount = Math.max(
+        viewableIndex - viewableCount * bufferMultiplier,
+        0
     );
 
-    const scroll = scrollIndex(rowHeight, scrollTop, intervalsPossible);
-
-    const maxHeight = (total - totalRendered) * rowHeight;
-
-    // if (scroll + 1 === intervalsPossible) {
-    //     return maxHeight;
-    // }
-
-    return scroll * ((DEFAULT_RENDERED_RECORDS_VISIBLE / 4) * rowHeight);
+    return spacerCount * rowHeight;
 };
 
-export const scrollIndex = (rowHeight, scrollTop) => {
+export const bufferBottom = (
+    rowHeight, viewableIndex, viewableCount, bufferMultiplier, totalCount
+) => {
+    const spacerCount = Math.max(
+        totalCount - viewableIndex - viewableCount * (bufferMultiplier + 1),
+        0
+    );
 
-    const INCREMENT = Math.floor(
-        DEFAULT_RENDERED_RECORDS_VISIBLE / 2
-    ) * rowHeight;
-
-    const slice = rowHeight * (DEFAULT_RENDERED_RECORDS_VISIBLE / 4);
-
-    const num = Math.floor(scrollTop / INCREMENT);
-
-    return Math.floor((scrollTop + (num * slice)) / INCREMENT);
+    return spacerCount * rowHeight;
 };

@@ -1,6 +1,6 @@
 export const CSS_PREFIX = 'react-grid';
 
-export const ROW_HEIGHT = 26;
+export const ROW_HEIGHT = 5000;
 
 export const DEFAULT_PAGE_SIZE = 20;
 

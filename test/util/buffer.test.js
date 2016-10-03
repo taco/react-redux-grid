@@ -5,7 +5,7 @@ import {
     bufferTop
 } from './../../src/util/buffer';
 
-describe('buffer utils - scrollIndex utility function', () => {
+xdescribe('buffer utils - scrollIndex utility function', () => {
 
     it('Should return scrollIndex when scroll top is 0', () => {
 
@@ -17,7 +17,7 @@ describe('buffer utils - scrollIndex utility function', () => {
 
 });
 
-describe('buffer utils - bufferBottom utility function', () => {
+xdescribe('buffer utils - bufferBottom utility function', () => {
 
     it('Should return buffer bottom when scroll top is 0', () => {
 
@@ -41,7 +41,7 @@ describe('buffer utils - bufferBottom utility function', () => {
 
 });
 
-describe('buffer utils - bufferTop utility function', () => {
+xdescribe('buffer utils - bufferTop utility function', () => {
 
     it('Should return buffer top when scroll top is 0', () => {
 
