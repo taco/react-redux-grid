@@ -4,7 +4,7 @@ import {
 } from './../constants/GridConstants';
 
 export const getCurrentRecords = (
-    dataSource, pageIndex, pageSize, scrollTop, infinite
+    dataSource, pageIndex, pageSize, scrollTop, infinite, rowHeight
 ) => {
 
     if (!dataSource) {

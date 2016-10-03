@@ -61,7 +61,8 @@ export class TableRow extends Component {
             plugins,
             scrollTop,
             stateKey,
-            store
+            store,
+            this
         );
 
         const rowComponents = getRows(
@@ -240,7 +241,8 @@ export const getRowSelection = (
     plugins,
     scrollTop,
     stateKey,
-    store
+    store,
+    scope
 ) => {
 
     if (!dataSource) {
@@ -254,7 +256,7 @@ export const getRowSelection = (
     }
 
     return getCurrentRecords(
-        dataSource, pageIndex, pageSize, scrollTop, infinite
+        dataSource, pageIndex, pageSize, scrollTop, infinite, scope.rowHeight || ROW_HEIGHT
     ).data;
 };
 
