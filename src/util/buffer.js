@@ -15,14 +15,15 @@ export const bufferBottom = (
     const maxHeight = rowHeight * (total - totalRendered);
 
 
-    console.log('bufferBottom', scroll, scrollTop);
+    // console.log('bufferBottom', scroll, scrollTop);
+
     if (scroll === 0) {
         return maxHeight;
     }
 
-    if (scroll === intervalsPossible) {
-        return 0;
-    }
+    // if (scroll + 1 === intervalsPossible) {
+    //     return 0;
+    // }
 
     return maxHeight -
         (scroll * (rowHeight * DEFAULT_RENDERED_RECORDS_VISIBLE / 4));
@@ -41,13 +42,9 @@ export const bufferTop = (
 
     const maxHeight = (total - totalRendered) * rowHeight;
 
-    if (scroll === 0) {
-        return 0;
-    }
-
-    if (scroll === intervalsPossible) {
-        return maxHeight;
-    }
+    // if (scroll + 1 === intervalsPossible) {
+    //     return maxHeight;
+    // }
 
     return scroll * ((DEFAULT_RENDERED_RECORDS_VISIBLE / 4) * rowHeight);
 };
@@ -58,5 +55,9 @@ export const scrollIndex = (rowHeight, scrollTop) => {
         DEFAULT_RENDERED_RECORDS_VISIBLE / 2
     ) * rowHeight;
 
-    return Math.floor(scrollTop / INCREMENT);
+    const slice = rowHeight * (DEFAULT_RENDERED_RECORDS_VISIBLE / 4);
+
+    const num = Math.floor(scrollTop / INCREMENT);
+
+    return Math.floor((scrollTop + (num * slice)) / INCREMENT);
 };

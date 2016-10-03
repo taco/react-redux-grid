@@ -121,7 +121,10 @@ export class Row extends Component {
                     events, row, id, selectionModel, index, e
                 );
             },
-            onDragStart: this.handleDragStart.bind(this)
+            onDragStart: this.handleDragStart.bind(this),
+            style: {
+                backgroundColor: id === 'row-99' ? 'red' : ''
+            }
         };
 
         columnManager.addActionColumn({
@@ -390,12 +393,10 @@ const rowTarget = {
         } = getTreeData();
 
         const path = [...getTreeData().path];
-
-        // console.log(monitor.getItem().getTreeData())
+        const targetPath = hoverPath;
 
         let targetIndex = hoverIndex;
         let targetParentId = hoverParentId;
-        let targetPath = hoverPath;
 
         // cant drop root
         if (index === -1) {

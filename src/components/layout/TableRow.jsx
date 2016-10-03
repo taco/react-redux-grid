@@ -4,7 +4,7 @@ import { DragDropContext } from 'react-dnd';
 import HTML5Backend from 'react-dnd-html5-backend';
 
 import { isPluginEnabled } from '../../util/isPluginEnabled';
-import { bufferTop, bufferBottom } from '../../util/buffer';
+import { scrollIndex, bufferTop, bufferBottom } from '../../util/buffer';
 import { prefix } from '../../util/prefix';
 import { getCurrentRecords } from '../../util/getCurrentRecords';
 import { getRowKey } from '../../util/getData';

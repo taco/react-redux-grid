@@ -54,7 +54,7 @@ export class TableContainer extends Component {
 
             this.container.addEventListener(
                 'scroll',
-                debounce(this.onScroll.bind(this), 20)
+                debounce(this.onScroll.bind(this), 5)
             );
         }
     }
